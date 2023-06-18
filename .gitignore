@@ -16,10 +16,6 @@
 *.dylib
 *.dll
 
-# Fortran module files
-*.mod
-*.smod
-
 # Compiled Static libraries
 *.lai
 *.la
@@ -30,3 +26,19 @@
 *.exe
 *.out
 *.app
+
+# Visual Studio files
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.csproj
+*.csproj.user
+*.sln
+
+# Folders
+.vs/
+x64/
+obj/
+
+# Misc files
+*.mdj
