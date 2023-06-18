@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Loom": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

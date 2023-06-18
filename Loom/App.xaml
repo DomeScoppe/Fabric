@@ -1,0 +1,22 @@
+﻿<Application x:Class="Loom.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Loom"
+             xmlns:viewModel="clr-namespace:Loom.GameProject.ViewModel"
+             xmlns:view="clr-namespace:Loom.GameProject.View"
+    StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/ControlTemplates.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            
+            <DataTemplate DataType="{x:Type viewModel:CreateProjectViewModel}">
+                <view:CreateProjectView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:OpenProjectViewModel}">
+                <view:OpenProjectView/>
+            </DataTemplate>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
