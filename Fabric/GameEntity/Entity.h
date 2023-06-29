@@ -2,25 +2,44 @@
 
 #include "Common.h"
 
-namespace fabric
+namespace fabric::entity
 {
-#define INIT_INFO(component) namespace component { struct init_info; }
-	
-	INIT_INFO(transform);
-	INIT_INFO(script);
+	TYPED_ID(entity_id);
+	TYPED_ID(component_id);
+	extern u64 _componentCounter;
 
-#undef INIT_INFO
-
-	namespace entity
+	template<typename T>
+	const component_id get_component_id()
 	{
-		struct entity_info
-		{
-			transform::init_info* transform{ nullptr };
-			script::init_info* script{ nullptr };
-		};
-
-		entity create(const entity_info& info);
-		void remove(entity_id id);
-		bool is_alive(entity_id id);
+		static component_id id = component_id(_componentCounter++);
+		return id;
 	}
+
+	void register_entity(entity_id id);
+	void unregister_entity(entity_id id);
+
+	namespace detail
+	{
+		bool has_component(entity_id entity, component_id component);
+		void* get_component(entity_id entity, component_id component);
+		void add_component(entity_id entity, component_id component, const void* data, u64 size);
+		void remove_component(entity_id entity, component_id component);
+	}
+
+	void* get_all_components(component_id component, u32& count);
+}
+
+namespace std
+{
+	template<>
+	struct hash<fabric::entity::entity_id>
+	{
+		size_t operator()(fabric::entity::entity_id const& id) const noexcept { return id.hash(); }
+	};
+
+	template<>
+	struct hash<fabric::entity::component_id>
+	{
+		size_t operator()(fabric::entity::component_id const& id) const noexcept { return id.hash(); }
+	};
 }

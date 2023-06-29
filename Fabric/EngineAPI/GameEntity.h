@@ -1,88 +1,47 @@
 #pragma once
 
 #include "../GameEntity/Common.h"
-#include "TransformComponent.h"
-#include "ScriptComponent.h"
+#include "../GameEntity/Entity.h"
 
-namespace fabric
+namespace fabric::entity
 {
-	namespace entity
+	class entity
 	{
-		TYPED_ID(entity_id);
+	public:
+		constexpr explicit entity(entity_id id) : _id{ id } {}
+		constexpr entity() : _id{ id::invalid_id } {}
 
-		class entity
+		constexpr entity_id get_id() const { return _id; }
+
+		template<typename T>
+		constexpr bool has_component()
 		{
-		public:
-			constexpr explicit entity(entity_id id) : _id{ id } {}
-			constexpr entity() : _id{ id::invalid_id } {}
+			const component_id comp = get_component_id<T>();
+			return detail::has_component(_id, comp);
+		}
 
-			constexpr entity_id get_id() const { return _id; }
-			constexpr bool is_valid() const { return id::is_valid(_id); }
-
-			transform::component transform() const;
-			script::component script() const;
-
-		private:
-			entity_id _id;
-		};
-	}
-
-	namespace script
-	{
-		class entity_script : public entity::entity
+		template<typename T>
+		constexpr T& get_component() const
 		{
-		public:
-			virtual ~entity_script() = default;
-			virtual void begin_play() {}
-			virtual void update(float) {}
+			const component_id comp = get_component_id<T>();
+			return *(static_cast<T*>(detail::get_component(_id, comp)));
+		}
 
-		protected:
-			constexpr explicit entity_script(entity entity)
-				: entity{ entity.get_id() } {}
-
-		};
-
-		namespace detail
+		template<typename T>
+		constexpr void add_component(const T& data) const
 		{
-			using script_ptr = std::unique_ptr<entity_script>;
-			using script_creator = script_ptr(*)(entity::entity);
-			using string_hash = std::hash<std::string>;
-
-			u8 register_script(size_t, script_creator);
-
-#ifdef USE_WITH_EDITOR
-			extern "C" __declspec(dllexport)
-#endif
-			script_creator get_script_creator(size_t);
-
-			template<class script_class>
-			script_ptr create_script(entity::entity entity)
-			{
-				assert(entity.is_valid());
-				return std::make_unique<script_class>(entity);
-			}
-
-#ifdef USE_WITH_EDITOR
-			u8 add_script_name(const char*);
-
-#define REGISTER_SCRIPT(TYPE)																																			\
-		namespace																																						\
-		{																																								\
-			const u8 _reg_##TYPE																																		\
-			{	fabric::script::detail::register_script(fabric::script::detail::string_hash()(#TYPE),																	\
-														&fabric::script::detail::create_script<TYPE>) };																\
-			const u8 _name_##TYPE																																		\
-			{	fabric::script::detail::add_script_name(#TYPE) };																										\
+			const component_id comp = get_component_id<T>();
+			detail::add_component(_id, comp, &data, sizeof(T));
 		}
-#else
-#define REGISTER_SCRIPT(TYPE)																																			\
-		namespace																																						\
-		{																																								\
-			const u8 _reg_##TYPE																																		\
-			{	fabric::script::detail::register_script(fabric::script::detail::string_hash()(#TYPE),																	\
-														&fabric::script::detail::create_script<TYPE>) };																\
+
+		template<typename T>
+		constexpr void remove_component() const
+		{
+			const component_id comp = get_component_id<T>();
+			detail::remove_component(_id, comp);
 		}
-#endif
-		}
-	}
+
+	private:
+		entity_id _id;
+	};
 }
