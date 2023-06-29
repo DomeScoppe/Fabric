@@ -2,13 +2,18 @@
 
 #include "Test.h"
 
-#include "GameEntity/Entity.h"
-#include "GameEntity/Transform.h"
+#include "EngineAPI/GameEntity.h"
+#include "EngineAPI/Scene.h"
 
 #include <iostream>
 #include <ctime>
 
 using namespace fabric;
+
+struct Random
+{
+	u32 random;
+};
 
 class engine_test : public test
 {
@@ -22,18 +27,7 @@ public:
 
 	virtual void run() override 
 	{ 
-		do
-		{
-			for (u32 i{ 0 }; i < 10000; ++i)
-			{
-				create_random();
-				remove_random();
-				_num_entities = (u32)_entities.size();
-			}
-
-			print_results();
-
-		} while (getchar() != 'q');
+		basic_creation_test();
 	}
 
 	virtual void shutdown() override 
@@ -42,68 +36,43 @@ public:
 	}
 
 private:
-	void create_random()
+	void basic_creation_test()
 	{
-		u32 count = rand() % 20;
+		Random r;
+		r.random = rand() % 20;
+		entity::entity e1 = scene::create_entity();
+		id::id_type e1_id = id::index(e1.get_id());
+		id::generation_type e1_generation = id::generation(e1.get_id());
 
-		if (_entities.empty()) count = 1000;
-		transform::init_info transform_info{};
-		entity::entity_info entity_info
+		e1.add_component<Random>(r);
+		Random& r_test = e1.get_component<Random>();
+		r_test.random = r.random * 2;
+
+		r = e1.get_component<Random>();
+
+		scene::remove_entity(e1);
+		entity::entity e2 = scene::create_entity();
+		id::id_type e2_id = id::index(e2.get_id());
+		id::generation_type e2_generation = id::generation(e2.get_id());
+
+		entity::entity e3 = scene::create_entity();
+		id::id_type e3_id = id::index(e3.get_id());
+		id::generation_type e3_generation = id::generation(e3.get_id());
+
+		e2.add_component<Random>({ 5 });
+		e3.add_component<Random>({ 7 });
+		const auto& all_components = scene::get_all<Random>();
+
+		for (auto& component : all_components)
 		{
-			.transform = &transform_info,
-		};
-
-		while (count > 0)
-		{
-			++_added;
-			entity::entity entity{ entity::create(entity_info) };
-
-			assert(entity.is_valid() && id::is_valid(entity.get_id()));
-
-			_entities.push_back(entity);
-
-			assert(entity::is_alive(entity.get_id()));
-
-			--count;
+			component.random *= 10;
 		}
-	}
 
-	void remove_random()
-	{
-		u32 count = rand() % 20;
-		if (_entities.size() < 1000) return;
-
-		while (count > 0)
-		{
-			const u32 index{ (u32)rand() % (u32)_entities.size() };
-			const entity::entity entity{ _entities[index] };
-
-			assert(entity.is_valid() && id::is_valid(entity.get_id()));
-
-			if (entity.is_valid())
-			{
-				entity::remove(entity.get_id());
-				_entities.erase(_entities.begin() + index);
-
-				assert(!entity::is_alive(entity.get_id()));
-
-				++_removed;
-			}
-
-			--count;
-		}
-	}
-
-	void print_results()
-	{
-		std::cout << "Entities created: " << _added << std::endl;
-		std::cout << "Entities removed: " << _removed << std::endl;
+		Random& r1 = e1.get_component<Random>();
+		Random& r2 = e2.get_component<Random>();
+		Random& r3 = e3.get_component<Random>();
 	}
 
 private:
-	utl::vector<entity::entity> _entities;
-
-	u32 _added{ 0 };
-	u32 _removed{ 0 };
-	u32 _num_entities{ 0 };
+	u64 _count = 0;
 };

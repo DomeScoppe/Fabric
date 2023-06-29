@@ -8,7 +8,10 @@
 #include <typeinfo>
 #include <memory>
 #include <unordered_map>
+#include <unordered_set>
+#include <set>
 #include <string>
+#include <span>
 
 // Windows includes
 #include <DirectXMath.h>
