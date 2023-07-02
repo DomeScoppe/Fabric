@@ -2,7 +2,7 @@
 
 namespace fabric::entity
 {
-	u32 _componentCounter = 0;
+	u32 _componentCounter = 1;
 	namespace
 	{
 		using component_map = std::unordered_map<component_id, u32>;
@@ -44,7 +44,7 @@ namespace fabric::entity
 		entity_metadata& metadata = entity_registry[id];
 		auto iter = metadata.components.begin();
 
-		for (u32 i = 0; i < metadata.components.size() && iter != metadata.components.end(); i++)
+		while(iter != metadata.components.end())
 		{
 			detail::remove_component(id, *iter);
 			iter = metadata.components.begin();

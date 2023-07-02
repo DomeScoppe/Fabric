@@ -46,6 +46,39 @@ namespace fabric::id
 		return index(id) | (generation << detail::index_bits);
 	}
 
+	constexpr id_type index_pair(id_type value1)
+	{
+		id_type index = value1;
+		assert(index != id::invalid_id);
+
+		return index;
+	}
+
+	constexpr id_type index_pair(id_type value1, id_type value2)
+	{
+		id_type index = value1;
+		index |= value2 << detail::index_bits;
+		assert(index != id::invalid_id);
+
+		return index;
+	}
+
+	constexpr id_type pair_value1(id_type id)
+	{
+		id_type index = id & detail::index_mask;
+		assert(index != id::invalid_id);
+
+		return index;
+	}
+
+	constexpr id_type pair_value2(id_type id)
+	{
+		id_type index = (id >> detail::index_bits) & detail::index_mask;
+		assert(index != id::invalid_id);
+
+		return index;
+	}
+
 #if _DEBUG
 	namespace internal
 	{

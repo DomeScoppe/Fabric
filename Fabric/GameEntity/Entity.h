@@ -9,11 +9,22 @@ namespace fabric::entity
 	extern u32 _componentCounter;
 
 	template<typename T>
-	const component_id get_component_id()
-	{
-		static component_id id = component_id(_componentCounter++);
-		return id;
-	}
+	concept IsScript = std::derived_from<T, struct component::script>;
+
+	template<typename T>
+	concept IsComponent = not IsScript<T>;
+
+	template<typename T>
+	concept IsScriptComponent = IsScript<T> and std::same_as<T, struct component::script>;
+
+	template<typename T> requires IsComponent<T>
+	const component_id get_component_id();
+
+	template<typename T> requires IsScript<T>
+	const component_id get_component_id();
+
+	template<typename T> requires IsScriptComponent<T>
+	const component_id get_component_id();
 
 	void register_entity(entity_id id);
 	void unregister_entity(entity_id id);

@@ -12,6 +12,7 @@
 #include <set>
 #include <string>
 #include <span>
+#include <concepts>
 
 // Windows includes
 #include <DirectXMath.h>

@@ -2,6 +2,7 @@
 
 #include "../Utilities/Math.h"
 #include "EngineAPI/GameEntity.h"
+#include "../GameEntity/Entity.h"
 #include "EngineAPI/Scene.h"
 
 namespace fabric::component
@@ -46,14 +47,13 @@ namespace fabric::component
 	{
 		using script_ptr = std::unique_ptr<script>;
 		using script_creator = script_ptr(*)(entity::entity_id);
-		using script_hash = std::hash<std::string>;
 
-		u8 register_script(size_t tag, script_creator func);
+		u8 register_script(entity::component_id id, script_creator func);
 
 #ifdef USE_WITH_EDITOR
 		extern "C" __declspec(dllexport)
 #endif
-			script_creator get_script_creator(size_t tag);
+			script_creator get_script_creator(entity::component_id id);
 
 		template<typename script_class>
 		script_ptr create_script(entity::entity_id id)
@@ -72,7 +72,7 @@ namespace fabric::component
 #define REGISTER_SCRIPT(TYPE)\
 namespace\
 	{\
-		const u8 _reg_##TYPE = fabric::component::detail::register_script(fabric::component::detail::script_hash()(#TYPE),\
+		const u8 _reg_##TYPE = fabric::component::detail::register_script(fabric::entity::get_component_id<TYPE>(),\
 																			&fabric::component::detail::create_script<TYPE>);\
 		const u8 _name_##TYPE = fabric::component::detail::add_script_name(#TYPE);\
 	}
@@ -80,8 +80,32 @@ namespace\
 #define REGISTER_SCRIPT(TYPE)\
 namespace\
 	{\
-		const u8 _reg_##TYPE = fabric::component::detail::register_script(fabric::component::detail::script_hash()(#TYPE),\
+		const u8 _reg_##TYPE = fabric::component::detail::register_script(fabric::entity::get_component_id<TYPE>(),\
 																			&fabric::component::detail::create_script<TYPE>);\
 	}
 #endif
+}
+
+namespace fabric::entity
+{
+	template<typename T> requires IsComponent<T>
+	const component_id get_component_id()
+	{
+		static component_id id = component_id(id::index_pair(_componentCounter++));
+		return id;
+	}
+
+	template<typename T> requires IsScript<T>
+	const component_id get_component_id()
+	{
+		static component_id id = component_id(id::index_pair(id::pair_value1(get_component_id<component::script>()), _componentCounter++));
+		return id;
+	}
+
+	template<typename T> requires IsScriptComponent<T>
+	const component_id get_component_id()
+	{
+		static component_id id = component_id(_componentCounter++);
+		return id;
+	}
 }
