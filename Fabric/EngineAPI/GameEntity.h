@@ -28,7 +28,7 @@ namespace fabric::entity
 		}
 
 		template<typename T>
-		constexpr void add_component(const T& data) const
+		constexpr void add_component(const T& data = T()) const
 		{
 			const component_id comp = get_component_id<T>();
 			detail::add_component(_id, comp, &data, sizeof(T));

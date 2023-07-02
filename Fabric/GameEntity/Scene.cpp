@@ -35,9 +35,12 @@ namespace fabric::scene
 	{
 		entity::entity_id id = entity.get_id();
 		assert(is_alive(id));
-		entity::unregister_entity(id);
-		free_ids.push_back(id);
-		++generations[id::index(id)];
+		if (is_alive(id))
+		{
+			entity::unregister_entity(id);
+			free_ids.push_back(id);
+			++generations[id::index(id)];
+		}
 	}
 
 	bool is_alive(entity::entity_id id)

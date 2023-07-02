@@ -2,7 +2,7 @@
 
 namespace fabric::entity
 {
-	u64 _componentCounter = 0;
+	u32 _componentCounter = 0;
 	namespace
 	{
 		using component_map = std::unordered_map<component_id, u32>;
@@ -53,14 +53,14 @@ namespace fabric::entity
 		entity_registry.erase(id);
 	}
 
-	void* get_all_components(component_id component, u32& count)
+	void* get_all_components(component_id component, u32& component_count)
 	{
 		assert(component_storage.contains(component));
-		count = 0;
+		component_count = 0;
 
 		if (component_storage.contains(component))
 		{
-			count = component_storage[component].count;
+			component_count = component_storage[component].count;
 
 			// TODO: request tight block of data from allocator
 			return component_storage[component].data;
@@ -134,6 +134,12 @@ namespace fabric::entity
 			// assign component to entity
 			entity_registry[entity].components.insert(component);
 			entity_registry[entity].component_index[component] = count;
+			component_mapping[component].insert(entity);
+		}
+
+		void add_logic_component(entity_id entity, component_id component)
+		{
+			entity_registry[entity].components.insert(component);
 			component_mapping[component].insert(entity);
 		}
 
