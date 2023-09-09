@@ -2,9 +2,7 @@
 
 #include "Test.h"
 
-#include "EngineAPI/Components.h"
-#include "EngineAPI/GameEntity.h"
-#include "EngineAPI/Scene.h"
+#include "Fabric.h"
 
 #include <iostream>
 #include <ctime>
@@ -19,93 +17,96 @@ struct Random
 class engine_test : public test
 {
 public:
-	virtual bool initialize() override 
+	virtual bool initialize() override
 	{
 		srand((u32)time(nullptr));
 
 		return true;
 	}
 
-	virtual void run() override 
+	virtual void run() override
 	{ 
-		basic_creation_test();
-		basic_component_test();
+		entity_test();
+		//component_test();
 	}
 
-	virtual void shutdown() override 
+	virtual void shutdown() override
 	{  
 
 	}
 
 private:
-	void basic_creation_test()
+	void entity_test()
 	{
 		entity::entity e1 = scene::create_entity();
-		id::id_type e1_id = id::index(e1.get_id());
-		id::id_type e1_generation = id::generation(e1.get_id());
-		scene::remove_entity(e1);
-
 		entity::entity e2 = scene::create_entity();
-		id::id_type e2_id = id::index(e2.get_id());
-		id::id_type e2_generation = id::generation(e2.get_id());
-
 		entity::entity e3 = scene::create_entity();
-		id::id_type e3_id = id::index(e3.get_id());
-		id::id_type e3_generation = id::generation(e3.get_id());
-
 		entity::entity e4 = scene::create_entity();
 
+		std::cout << "Entity id: " << e1.get_id() << std::endl;
+		std::cout << "Entity id: " << e2.get_id() << std::endl;
+		std::cout << "Entity id: " << e3.get_id() << std::endl;
+		std::cout << "Entity id: " << e4.get_id() << std::endl;
+
+		scene::remove_entity(e1);
 		scene::remove_entity(e2);
 		scene::remove_entity(e3);
 		scene::remove_entity(e4);
+
+		entity::entity e5 = scene::create_entity();
+		entity::entity e6 = scene::create_entity();
+		entity::entity e7 = scene::create_entity();
+		entity::entity e8 = scene::create_entity();
+
+		std::cout << "Entity id: " << e5.get_id() << std::endl;
+		std::cout << "Entity id: " << e6.get_id() << std::endl;
+		std::cout << "Entity id: " << e7.get_id() << std::endl;
+		std::cout << "Entity id: " << e8.get_id() << std::endl;
+
+		scene::remove_entity(e5);
+		scene::remove_entity(e6);
+		scene::remove_entity(e7);
+		scene::remove_entity(e8);
+
+		entity::entity e9 = scene::create_entity();
+		entity::entity e10 = scene::create_entity();
+		entity::entity e11 = scene::create_entity();
+		entity::entity e12 = scene::create_entity();
+
+		std::cout << "Entity id: " << e9.get_id() << std::endl;
+		std::cout << "Entity id: " << e10.get_id() << std::endl;
+		std::cout << "Entity id: " << e11.get_id() << std::endl;
+		std::cout << "Entity id: " << e12.get_id() << std::endl;
+
+		scene::remove_entity(e9);
+		scene::remove_entity(e10);
+		scene::remove_entity(e11);
+		scene::remove_entity(e12);
 	}
 
-	void basic_component_test()
+	void component_test()
 	{
 		Random r;
 		r.random = rand() % 20;
+
 		entity::entity e1 = scene::create_entity();
-		id::id_type e1_id = id::index(e1.get_id());
-		id::id_type e1_generation = id::generation(e1.get_id());
 
-		e1.add_component<Random>(r);
-		Random& r_test = e1.get_component<Random>();
-		r_test.random = r.random * 2;
+		e1.add_component<Random>();
 
-		r = e1.get_component<Random>();
-		e1.remove_component<Random>();
+		if(e1.has_component<Random>())
+			e1.add_component<Random>(r);
 
 		scene::remove_entity(e1);
-		entity::entity e2 = scene::create_entity();
-		id::id_type e2_id = id::index(e2.get_id());
-		id::id_type e2_generation = id::generation(e2.get_id());
+	}
 
-		entity::entity e3 = scene::create_entity();
-		id::id_type e3_id = id::index(e3.get_id());
-		id::id_type e3_generation = id::generation(e3.get_id());
+	void relationship_test()
+	{
 
-		e2.add_component<Random>({ 5 });
+	}
 
-		e3.add_component<Random>({ 7 });
+	void script_test()
+	{
 
-		entity::entity e4 = scene::create_entity();
-		e4.add_component<Random>();
-
-		const auto& all_random_components = scene::get_all<Random>();
-
-		for (auto& component : all_random_components)
-		{
-			component.random *= 10;
-		}
-
-		Random& r1 = e1.get_component<Random>();
-		Random& r2 = e2.get_component<Random>();
-		Random& r3 = e3.get_component<Random>();
-		Random& r4 = e4.get_component<Random>();
-
-		scene::remove_entity(e2);
-		scene::remove_entity(e3);
-		scene::remove_entity(e4);
 	}
 
 private:
