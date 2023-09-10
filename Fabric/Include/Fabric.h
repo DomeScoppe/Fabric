@@ -26,10 +26,11 @@ namespace fabric
 				ecs::component component
 				{
 					.owner = _id,
-					.type = typeid(Component).hash_code()
+					.id = typeid(Component).hash_code(),
+					.size = sizeof(Component)
 				};
 
-				ecs::add_component(&component);
+				ecs::add_component(component);
 			}
 
 			template<typename Component>
@@ -38,12 +39,29 @@ namespace fabric
 				ecs::component comp
 				{
 					.owner = _id,
-						.type = typeid(Component).hash_code(),
-						.data = &component,
-						.size = sizeof(Component)
+					.id = typeid(Component).hash_code(),
+					.data = &component,
+					.size = sizeof(Component)
 				};
 
-				ecs::add_component(&comp);
+				ecs::add_component(comp);
+			}
+
+			template<typename Component>
+			constexpr const Component& get_component()
+			{
+				Component* component = (Component*) ecs::get_component(_id, typeid(Component).hash_code());
+
+				if (component)
+					return *component;
+
+				return Component();
+			}
+
+			template<typename Component>
+			constexpr void remove_component()
+			{
+				ecs::remove_component(_id, typeid(Component).hash_code());
 			}
 
 		private:

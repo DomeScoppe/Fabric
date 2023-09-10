@@ -10,7 +10,8 @@ namespace fabric::ecs
         entity_id _next = id::invalid_id;
         u32 _free_count = 0;
 
-        std::unordered_map<u64, utl::sparse_set> component_storage;
+        // Component storage
+        std::unordered_map<component_id, utl::sparse_set> _component_registry;
     }
 
     entity_id create_entity()
@@ -18,7 +19,7 @@ namespace fabric::ecs
         if (_free_count)
         {
             entity_id id = id::new_generation(_next);
-            u32 index = id::index(id);
+            id::id_type index = id::index(id);
             
             _next = _registry[index];
             _registry[index] = id;
@@ -27,7 +28,7 @@ namespace fabric::ecs
 
             if (index != id::invalid_index)
             {
-                u32 generation = id::generation(_registry[index]);
+                id::id_type generation = id::generation(_registry[index]);
                 _next = id::new_identifier(index, generation);
             }
             else
@@ -38,7 +39,7 @@ namespace fabric::ecs
             return id;
         }
 
-        u32 index = _registry.size();
+        size_t index = _registry.size();
         u32 generation = 0;
 
         entity_id id = _registry.emplace_back(id::new_identifier(index, generation));
@@ -50,9 +51,9 @@ namespace fabric::ecs
     {
         assert(is_alive(id));
 
-        u32 index = id::index(id);
-        u32 generation = id::generation(id);
-        u32 next_index = id::is_valid(_next) ? id::index(_next) : id::invalid_index;
+        id::id_type index = id::index(id);
+        id::id_type generation = id::generation(id);
+        id::id_type next_index = id::is_valid(_next) ? id::index(_next) : id::invalid_index;
 
         _registry[index] = id::new_identifier(next_index, generation);
 
@@ -62,11 +63,48 @@ namespace fabric::ecs
 
     bool is_alive(entity_id id)
     {
-        u32 index = id::index(id);
-        u32 generation = id::generation(id);
+        id::id_type index = id::index(id);
+        id::id_type generation = id::generation(id);
 
         return id::generation(_registry[index]) == generation;
     }
 
+    bool has_component(entity_id id, component_id component)
+    {
+        assert(_component_registry.contains(component));
+
+        if (_component_registry.contains(component) && _component_registry[component].has(id))
+            return true;
+
+        return false;
+    }
+
+    void add_component(component& component)
+    {
+        if (!_component_registry.contains(component.id))
+            _component_registry[component.id] = utl::sparse_set::create(component.size);
+
+        _component_registry[component.id].emplace(component.owner, component.data);
+    }
+
+    void remove_component(entity_id id, component_id component)
+    {
+        assert(has_component(id, component));
+
+        if (has_component(id, component))
+        {
+            _component_registry[component].remove(id);
+        }
+    }
+
+    void* get_component(entity_id id, component_id component)
+    {
+        assert(has_component(id, component));
+
+        if (has_component(id, component))
+            return _component_registry[component][id];
+
+        return nullptr;
+    }
 }
 

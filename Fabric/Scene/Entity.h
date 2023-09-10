@@ -5,17 +5,20 @@
 namespace fabric::ecs
 {
 	TYPED_ID(entity_id);
+	TYPED_ID(component_id);
 
 	struct component
 	{
 		entity_id owner;
-		u64 type;
+		component_id id;
 		void* data = nullptr;
 		u64 size = 0;
 	};
 
-	bool has_component(entity_id id, u64 type);
-	void add_component(component* component);
+	bool has_component(entity_id id, component_id component);
+	void add_component(component& component);
+	void remove_component(entity_id id, component_id component);
+	void* get_component(entity_id id, component_id component);
 }
 
 namespace std

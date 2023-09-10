@@ -14,6 +14,13 @@ struct Random
 	u32 random;
 };
 
+struct Transform
+{
+	float position[3];
+};
+
+struct Tag {};
+
 class engine_test : public test
 {
 public:
@@ -27,7 +34,7 @@ public:
 	virtual void run() override
 	{ 
 		entity_test();
-		//component_test();
+		component_test();
 	}
 
 	virtual void shutdown() override
@@ -89,24 +96,49 @@ private:
 		Random r;
 		r.random = rand() % 20;
 
+		Transform transform;
+		transform.position[0] = 1.0f;
+		transform.position[1] = 2.0f;
+		transform.position[2] = 3.0f;
+
 		entity::entity e1 = scene::create_entity();
+
+		e1.add_component<Tag>();
 
 		e1.add_component<Random>();
 
-		if(e1.has_component<Random>())
+		Random r1 = e1.get_component<Random>();
+
+		e1.add_component<Transform>(transform);
+
+		if (e1.has_component<Random>())
+		{
 			e1.add_component<Random>(r);
+			
+			std::cout << "Random: " << r1.random << std::endl;
+		}
+
+		transform.position[0] = 10.0f;
+		transform.position[1] = 20.0f;
+		transform.position[2] = 30.0f;
+
+		if (e1.has_component<Transform>())
+		{
+			e1.add_component<Transform>(transform);
+
+			Transform t = e1.get_component<Transform>();
+
+			std::cout << "Position X: " << t.position[0] << std::endl;
+			std::cout << "Position Y: " << t.position[1] << std::endl;
+			std::cout << "Position Z: " << t.position[2] << std::endl;
+
+		}
+
+		e1.remove_component<Tag>();
+		e1.remove_component<Random>();
+		e1.remove_component<Transform>();
 
 		scene::remove_entity(e1);
-	}
-
-	void relationship_test()
-	{
-
-	}
-
-	void script_test()
-	{
-
 	}
 
 private:
