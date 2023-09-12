@@ -14,6 +14,16 @@ void system_func()
 	std::cout << "System working!" << std::endl;
 }
 
+void update()
+{
+	std::cout << std::endl << "Updating all transforms..." << std::endl << std::endl;
+	// Get all entities with transform
+
+	// Update entities transforms
+
+	// Display the data
+}
+
 struct Random
 {
 	u32 random;
@@ -22,6 +32,14 @@ struct Random
 struct Transform
 {
 	float position[3];
+
+	void operator *=(float ts)
+	{
+		for (int i = 0; i < 3; i++)
+		{
+			position[i] *= ts;
+		}
+	}
 };
 
 struct Tag {};
@@ -127,9 +145,7 @@ private:
 			std::cout << "Random: " << r1.random << std::endl;
 		}
 
-		transform.position[0] = 10.0f;
-		transform.position[1] = 20.0f;
-		transform.position[2] = 30.0f;
+		transform *= 10.0f;
 
 		if (e1.has_component<Transform>())
 		{
@@ -153,6 +169,7 @@ private:
 	void system_test()
 	{
 		REGISTER_SYSTEM(Tag, system_func, Transform, Random);
+		REGISTER_SYSTEM(Transform, update, scene::None);
 	}
 
 private:

@@ -1,6 +1,8 @@
 #include "Scene.h"
 #include "Utilities/SparseSet.h"
 
+#include <iostream>
+
 namespace fabric::ecs
 {
     u32 _componentCounter = 0;
@@ -15,7 +17,7 @@ namespace fabric::ecs
         // Component storage
         std::unordered_map<component_id, utl::sparse_set> _component_registry;
 
-        // System storage
+        // System storage - temporary
         std::unordered_map<system_id, void(*)()> _system_registry;
     }
 
@@ -82,7 +84,7 @@ namespace fabric::ecs
 
     void add_dependency(system_id id, component_id dependency)
     {
-
+        std::cout << "Dependency id: " << dependency << std::endl;
     }
 
     void run_systems()
