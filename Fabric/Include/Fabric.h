@@ -17,7 +17,7 @@ namespace fabric
 			template<typename Component>
 			constexpr bool has_component()
 			{
-				return ecs::has_component(_id, typeid(Component).hash_code());
+				return ecs::has_component(_id, ecs::get_component_id<Component>());
 			}
 
 			template<typename Component>
@@ -26,7 +26,7 @@ namespace fabric
 				ecs::component component
 				{
 					.owner = _id,
-					.id = typeid(Component).hash_code(),
+					.id = ecs::get_component_id<Component>(),
 					.size = sizeof(Component)
 				};
 
@@ -39,7 +39,7 @@ namespace fabric
 				ecs::component comp
 				{
 					.owner = _id,
-					.id = typeid(Component).hash_code(),
+					.id = ecs::get_component_id<Component>(),
 					.data = &component,
 					.size = sizeof(Component)
 				};
@@ -50,7 +50,7 @@ namespace fabric
 			template<typename Component>
 			constexpr const Component& get_component()
 			{
-				Component* component = (Component*) ecs::get_component(_id, typeid(Component).hash_code());
+				Component* component = (Component*) ecs::get_component(_id, ecs::get_component_id<Component>());
 
 				if (component)
 					return *component;
@@ -61,7 +61,7 @@ namespace fabric
 			template<typename Component>
 			constexpr void remove_component()
 			{
-				ecs::remove_component(_id, typeid(Component).hash_code());
+				ecs::remove_component(_id, ecs::get_component_id<Component>());
 			}
 
 		private:

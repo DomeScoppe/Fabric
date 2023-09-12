@@ -3,6 +3,8 @@
 
 namespace fabric::ecs
 {
+    u32 _componentCounter = 0;
+    
     namespace
     {
         // Entity storage
