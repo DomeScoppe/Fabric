@@ -9,6 +9,11 @@
 
 using namespace fabric;
 
+void system_func()
+{
+	std::cout << "System working!" << std::endl;
+}
+
 struct Random
 {
 	u32 random;
@@ -35,6 +40,10 @@ public:
 	{ 
 		entity_test();
 		component_test();
+		system_test();
+
+		scene::run_systems();
+		std::cin.get();
 	}
 
 	virtual void shutdown() override
@@ -139,6 +148,11 @@ private:
 		e1.remove_component<Transform>();
 
 		scene::remove_entity(e1);
+	}
+
+	void system_test()
+	{
+		REGISTER_SYSTEM(Tag, system_func, Transform, Random);
 	}
 
 private:

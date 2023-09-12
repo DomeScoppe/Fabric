@@ -5,7 +5,17 @@
 
 #if USE_STL_VECTOR
 #include <vector>
-namespace fabric::utl {
+namespace fabric::utl 
+{
+	template<typename... Types>
+	struct type_list {};
+
+	template<typename Head, typename... Tail>
+	struct type_list<type_list<Head, Tail...>>
+	{
+		using Type = Head;
+	};
+
 	template<typename T>
 	using vector = typename std::vector<T>;
 

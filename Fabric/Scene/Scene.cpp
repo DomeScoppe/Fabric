@@ -14,6 +14,9 @@ namespace fabric::ecs
 
         // Component storage
         std::unordered_map<component_id, utl::sparse_set> _component_registry;
+
+        // System storage
+        std::unordered_map<system_id, void(*)()> _system_registry;
     }
 
     entity_id create_entity()
@@ -69,6 +72,25 @@ namespace fabric::ecs
         id::id_type generation = id::generation(id);
 
         return id::generation(_registry[index]) == generation;
+    }
+
+    system_id register_system(component_id owner, void(*function)())
+    {
+        _system_registry[owner] = function;
+        return owner;
+    }
+
+    void add_dependency(system_id id, component_id dependency)
+    {
+
+    }
+
+    void run_systems()
+    {
+        for (auto& system : _system_registry)
+        {
+            system.second();
+        }
     }
 
     bool has_component(entity_id id, component_id component)

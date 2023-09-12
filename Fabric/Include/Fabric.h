@@ -71,6 +71,35 @@ namespace fabric
 
 	namespace scene
 	{
+		template<typename Component>
+		using Owner = typename utl::type_list<Component>;
+
+		template<typename Head, typename... Tail>
+		using Dependencies = typename utl::type_list<Head, Tail...>;
+
+		template<typename Component, typename Head, typename... Tail>
+		struct system
+		{
+			utl::type_list<Component> owner;
+			utl::type_list<Head, Tail...> dependencies;
+			void (*function)();
+		};
+
+		/// Convenience macro for registering systems.
+		/// @param OWNER: Component that owns the system
+		/// @param FN: Callback to system behavior function
+		/// @param ...: Dependencies that must be resolved before this system can run
+#define REGISTER_SYSTEM(OWNER, FN, ...)							\
+		scene::Owner<OWNER> OWNER##_ownership;					\
+		scene::Dependencies<__VA_ARGS__> OWNER##_dependencies;	\
+		scene::system<OWNER, __VA_ARGS__> OWNER##_system		\
+		{														\
+			.owner = OWNER##_ownership,							\
+			.dependencies = OWNER##_dependencies,				\
+			.function = &FN										\
+		};														\
+		scene::register_system(OWNER##_system);
+
 		entity::entity create_entity()
 		{
 			return entity::entity(ecs::create_entity());
@@ -79,6 +108,36 @@ namespace fabric
 		void remove_entity(entity::entity e)
 		{
 			ecs::remove_entity(e.get_id());
+		}
+
+		template<typename Component, typename Head, typename... Tail> requires IsNotSame<Component, Head>
+		void register_system(system<Component, Head, Tail...>& sys)
+		{
+			static ecs::system_id id = ecs::register_system(ecs::get_component_id<Owner<Component>>(), sys.function);
+			ecs::add_dependency(id, ecs::get_component_id<Dependencies<Head>>());
+			
+				Owner<Component> component_ownership;
+				Dependencies<Tail...> component_dependencies;
+				system<Component, Tail...> component_system
+				{
+					.owner = component_ownership,
+					.dependencies = component_dependencies,
+					.function = sys.function
+				};
+
+				register_system(component_system);
+		}
+
+		template<typename Component, typename Head> requires IsNotSame<Component, Head>
+		void register_system(system<Component, Head>& sys)
+		{
+			static ecs::system_id id = ecs::register_system(ecs::get_component_id<Owner<Component>>(), sys.function);
+			ecs::add_dependency(id, ecs::get_component_id<Dependencies<Head>>());
+		}
+
+		void run_systems()
+		{
+			ecs::run_systems();
 		}
 	}
 }
