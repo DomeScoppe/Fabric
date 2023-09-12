@@ -45,14 +45,9 @@ namespace fabric::utl
 			_component_size = 0;
 			_size = 0;
 
-			// TODO: Memory should be returned to a memory pool, not to the OS
-			free(_sparse);
-			free(_dense);
-			free(_component);
-
-			_sparse = nullptr;
-			_dense = nullptr;
-			_component = nullptr;
+			memory::pool_allocator::free(_sparse);
+			memory::pool_allocator::free(_dense);
+			memory::pool_allocator::free(_component);
 		}
 
 		static sparse_set create(size_t component_size, size_t size = 1024)
@@ -118,11 +113,9 @@ namespace fabric::utl
 
 		void resize(size_t size)
 		{
-			// TODO: Memory should be allocated from a memory pool, not from the OS
-
-			id::id_type* sparse = (id::id_type*) malloc(size * sizeof(id::id_type));
-			id::id_type* dense = (id::id_type*) malloc(size * sizeof(id::id_type));
-			void* component = malloc(size * _component_size);
+			id::id_type* sparse = (id::id_type*) memory::pool_allocator::allocate(size * sizeof(id::id_type));
+			id::id_type* dense = (id::id_type*)memory::pool_allocator::allocate(size * sizeof(id::id_type));
+			void* component = memory::pool_allocator::allocate(size * _component_size);
 
 			if(sparse)
 				memset(sparse, -1, size * sizeof(id::id_type));
@@ -141,10 +134,9 @@ namespace fabric::utl
 				memcpy_s(dense, size * sizeof(id::id_type), _dense, _size);
 				memcpy_s(component, size * _component_size, _sparse, _size);
 
-				// TODO: Memory should be returned to a memory pool, not to the OS
-				free(_sparse);
-				free(_dense);
-				free(_component);
+				memory::pool_allocator::free(_sparse);
+				memory::pool_allocator::free(_dense);
+				memory::pool_allocator::free(_component);
 			}
 
 			_next_component = (char*)component + (_size * _component_size);
